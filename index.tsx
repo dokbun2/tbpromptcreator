@@ -463,8 +463,8 @@ const App = () => {
   // Quick Translator State - Default Closed
   const [isTranslatorOpen, setIsTranslatorOpen] = useState(false);
 
-  // Sidebar section collapse state
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  // Sidebar section expanded state (default: collapsed)
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [transInput, setTransInput] = useState("");
   const [transOutput, setTransOutput] = useState("");
   const [isTransLoading, setIsTransLoading] = useState(false);
@@ -712,15 +712,15 @@ const App = () => {
             {(template.prompt_sections || []).map((section) => (
               <div key={section.section_id} className="border border-zinc-800 rounded-lg bg-zinc-950 overflow-hidden shadow-sm group">
                 <button
-                  onClick={() => setCollapsedSections(prev => ({ ...prev, [section.section_id]: !prev[section.section_id] }))}
+                  onClick={() => setExpandedSections(prev => ({ ...prev, [section.section_id]: !prev[section.section_id] }))}
                   className="w-full px-3 py-2 bg-zinc-900/50 border-b border-zinc-800 flex items-center gap-2 text-sm font-medium text-zinc-300 hover:bg-zinc-800/50 transition-colors"
                 >
-                  {collapsedSections[section.section_id] ? <ChevronRight className="w-3.5 h-3.5 text-zinc-500" /> : <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />}
+                  {expandedSections[section.section_id] ? <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /> : <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />}
                   <Settings className="w-3.5 h-3.5 text-zinc-500" />
                   <span className="truncate flex-1 text-left">{section.section_label_ko || section.section_label || section.section_id}</span>
                   {(section.is_active !== false) && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>}
                 </button>
-                {!collapsedSections[section.section_id] && (
+                {expandedSections[section.section_id] && (
                   <div className="p-2 space-y-1">
                     {(section.components || []).map((comp) => (
                       <div
