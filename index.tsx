@@ -663,7 +663,7 @@ const App = () => {
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
         >
-          <img src="/logo.svg" alt="TB Logo" className="w-8 h-8 rounded-lg" />
+          <img src="/logo.png" alt="TB Logo" className="w-8 h-8 rounded-lg" />
           <h1 className="text-xl font-bold text-white tracking-tight">
             TB 프롬프트 편집기
           </h1>
