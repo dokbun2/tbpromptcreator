@@ -659,7 +659,7 @@ const App = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black text-zinc-200 overflow-hidden font-sans selection:bg-zinc-700/50">
+    <div className="flex flex-col h-screen bg-black text-zinc-200 overflow-hidden selection:bg-zinc-700/50">
       {/* Header */}
       <header className="h-16 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-6 z-10 shrink-0">
         <a
