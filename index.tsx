@@ -658,22 +658,34 @@ const App = () => {
     navigator.clipboard.writeText(text);
   };
 
+  // Mobile sidebar toggle state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <div className="flex flex-col h-screen bg-black text-zinc-200 overflow-hidden selection:bg-zinc-700/50">
       {/* Header */}
-      <header className="h-16 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-6 z-10 shrink-0">
-        <a
-          href="/"
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-          onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
-        >
-          <img src="/logo.png" alt="TB Logo" className="w-8 h-8 rounded-lg" />
-          <h1 className="text-xl font-bold text-white tracking-tight">
-            TB 프롬프트 편집기
-          </h1>
-        </a>
-        <div className="flex items-center gap-2">
-           <button 
+      <header className="h-14 md:h-16 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-3 md:px-6 z-20 shrink-0">
+        <div className="flex items-center gap-2 md:gap-3">
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="md:hidden p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+          >
+            {isSidebarOpen ? <X className="w-5 h-5" /> : <Layers className="w-5 h-5" />}
+          </button>
+          <a
+            href="/"
+            className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity"
+            onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
+          >
+            <img src="/logo.png" alt="TB Logo" className="w-7 h-7 md:w-8 md:h-8 rounded-lg" />
+            <h1 className="text-base md:text-xl font-bold text-white tracking-tight">
+              TB 프롬프트 편집기
+            </h1>
+          </a>
+        </div>
+        <div className="flex items-center gap-1 md:gap-2">
+           <button
              onClick={() => setIsApiInfoOpen(true)}
              className={`p-2 rounded-full transition-all duration-100 active:scale-95 relative group ${userApiKey ? 'text-emerald-400 bg-emerald-900/20' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
              title="API 연결 정보"
@@ -683,23 +695,37 @@ const App = () => {
                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
              )}
            </button>
-          <div className="bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full text-xs font-medium text-zinc-400">
-            v2.2 (Custom API Key)
+          <div className="hidden sm:block bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full text-xs font-medium text-zinc-400">
+            v2.2
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
-        
+      <div className="flex flex-1 overflow-hidden relative">
+
+        {/* Mobile Overlay */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/60 z-30 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
         {/* LEFT PANEL: Structure Tree */}
-        <aside className="w-80 bg-zinc-900 border-r border-zinc-800 flex flex-col shrink-0">
-          <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900">
+        <aside className={`
+          fixed md:relative inset-y-0 left-0 z-40 md:z-auto
+          w-72 md:w-80 bg-zinc-900 border-r border-zinc-800 flex flex-col shrink-0
+          transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          top-14 md:top-0 h-[calc(100vh-3.5rem)] md:h-auto
+        `}>
+          <div className="p-3 md:p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900">
             <h2 className="font-semibold text-sm text-zinc-300 flex items-center gap-2">
               <Layers className="w-4 h-4 text-zinc-500" />
               구조 (Structure)
             </h2>
-            <button 
+            <button
               onClick={() => setIsUploadModalOpen(true)}
               className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700 rounded hover:bg-zinc-700 transition-all duration-100 active:scale-95"
             >
@@ -707,8 +733,8 @@ const App = () => {
               업로드
             </button>
           </div>
-          
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin scrollbar-thumb-zinc-800">
+
+          <div className="flex-1 overflow-y-auto p-2 md:p-3 space-y-2 md:space-y-3 scrollbar-thin scrollbar-thumb-zinc-800">
             {(template.prompt_sections || []).map((section) => (
               <div key={section.section_id} className="border border-zinc-800 rounded-lg bg-zinc-950 overflow-hidden shadow-sm group">
                 <button
@@ -732,8 +758,9 @@ const App = () => {
                             el.classList.add('ring-2', 'ring-emerald-500');
                             setTimeout(() => el.classList.remove('ring-2', 'ring-emerald-500'), 2000);
                           }
+                          setIsSidebarOpen(false); // Close sidebar on mobile
                         }}
-                        className="pl-2 flex items-center gap-2 text-xs text-zinc-400 py-1 hover:bg-zinc-900 hover:text-white rounded cursor-pointer transition-colors"
+                        className="pl-2 flex items-center gap-2 text-xs text-zinc-400 py-1.5 md:py-1 hover:bg-zinc-900 hover:text-white rounded cursor-pointer transition-colors"
                       >
                         <Box className="w-3 h-3 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
                         <span className="truncate">{comp.component_label_ko || comp.component_label || comp.component_id}</span>
@@ -765,12 +792,12 @@ const App = () => {
           </div>
 
           {/* SIDEBAR FOOTER: External Tools */}
-          <div className="p-4 border-t border-zinc-800 bg-zinc-900">
-            <a 
-              href="https://translate.google.co.kr/" 
-              target="_blank" 
+          <div className="p-3 md:p-4 border-t border-zinc-800 bg-zinc-900">
+            <a
+              href="https://translate.google.co.kr/"
+              target="_blank"
               rel="noreferrer"
-              className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-medium rounded-lg border border-zinc-700 hover:border-zinc-600 transition-all duration-100 active:scale-95 shadow-sm"
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 md:py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-medium rounded-lg border border-zinc-700 hover:border-zinc-600 transition-all duration-100 active:scale-95 shadow-sm"
               title="새 탭에서 구글 번역기 열기"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -781,19 +808,19 @@ const App = () => {
 
         {/* RIGHT PANEL: Editor & Output */}
         <main className="flex-1 flex flex-col min-w-0 bg-black">
-          
+
           {/* Top: AI Assistant */}
-          <div className="p-6 bg-zinc-900 border-b border-zinc-800 shadow-sm z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <Wand2 className="w-5 h-5 text-white" />
-              <h2 className="font-semibold text-zinc-200">AI 프롬프트 수정 (Korean → Optimized English JSON)</h2>
+          <div className="p-3 md:p-6 bg-zinc-900 border-b border-zinc-800 shadow-sm z-10">
+            <div className="flex items-center gap-2 mb-2 md:mb-3">
+              <Wand2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              <h2 className="font-semibold text-sm md:text-base text-zinc-200">AI 프롬프트 수정</h2>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col md:flex-row gap-2 md:gap-3">
               <textarea
                 value={aiInput}
                 onChange={(e) => setAiInput(e.target.value)}
-                placeholder="요청사항을 입력하세요 (예: '거북이 모양의 우주선을 만들어줘'). &#13;&#10;입력 후 버튼을 누르면 최적화된 영문 프롬프트 JSON이 생성됩니다."
-                className="flex-1 h-20 p-3 text-sm bg-black text-white border border-zinc-700 rounded-lg focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 outline-none resize-none transition-all placeholder:text-zinc-600"
+                placeholder="요청사항을 입력하세요 (예: '거북이 모양의 우주선을 만들어줘')"
+                className="flex-1 h-16 md:h-20 p-2.5 md:p-3 text-sm bg-black text-white border border-zinc-700 rounded-lg focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500 outline-none resize-none transition-all placeholder:text-zinc-600"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -804,15 +831,14 @@ const App = () => {
               <button
                 onClick={handleAiModification}
                 disabled={isAiLoading}
-                className="px-6 rounded-lg bg-white text-black font-bold hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-100 active:scale-95 flex flex-col items-center justify-center gap-1 min-w-[120px]"
+                className="w-full md:w-auto px-4 md:px-6 py-3 md:py-0 rounded-lg bg-white text-black font-bold hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-100 active:scale-95 flex flex-row md:flex-col items-center justify-center gap-2 md:gap-1 md:min-w-[120px]"
               >
                 {isAiLoading ? (
                   <RefreshCw className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
                     <Wand2 className="w-5 h-5" />
-                    <span className="text-xs">프롬프트 수정</span>
-                    <span className="text-[10px] opacity-70">(AI 변환)</span>
+                    <span className="text-sm md:text-xs">AI 변환</span>
                   </>
                 )}
               </button>
@@ -820,26 +846,26 @@ const App = () => {
           </div>
 
           {/* Middle: Tab Content */}
-          <div className="flex-1 p-6 flex flex-col min-h-0 bg-black relative">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex gap-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800">
-                <button 
+          <div className="flex-1 p-3 md:p-6 flex flex-col min-h-0 bg-black relative">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 mb-3">
+              <div className="flex gap-1 bg-zinc-900 p-1 rounded-lg border border-zinc-800 w-full sm:w-auto">
+                <button
                   onClick={() => setActiveTab('preview')}
-                  className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all duration-100 active:scale-95 ${activeTab === 'preview' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'}`}
+                  className={`flex-1 sm:flex-none px-3 md:px-4 py-2 md:py-1.5 text-xs font-medium rounded-md transition-all duration-100 active:scale-95 ${activeTab === 'preview' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'}`}
                 >
-                  시각적 편집 (Visual Editor)
+                  시각적 편집
                 </button>
-                <button 
+                <button
                   onClick={() => setActiveTab('prompt')}
-                  className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all duration-100 active:scale-95 ${activeTab === 'prompt' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'}`}
+                  className={`flex-1 sm:flex-none px-3 md:px-4 py-2 md:py-1.5 text-xs font-medium rounded-md transition-all duration-100 active:scale-95 ${activeTab === 'prompt' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'}`}
                 >
-                  최종 프롬프트 (Midjourney Prompt)
+                  최종 프롬프트
                 </button>
               </div>
               <div className="flex gap-2">
-                 <button 
+                 <button
                   onClick={() => copyToClipboard(promptString)}
-                  className="text-xs flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all duration-100 active:scale-95"
+                  className="text-xs flex items-center justify-center gap-1.5 px-3 py-2 md:py-1.5 bg-zinc-900 border border-zinc-700 rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all duration-100 active:scale-95 w-full sm:w-auto"
                 >
                   <Copy className="w-3.5 h-3.5" /> Prompt 복사
                 </button>
@@ -851,73 +877,73 @@ const App = () => {
                 <textarea
                   value={promptString}
                   readOnly
-                  className="w-full h-full p-6 bg-[#0a0a0a] font-mono text-sm text-green-400 resize-none outline-none leading-relaxed selection:bg-zinc-800"
+                  className="w-full h-full p-4 md:p-6 bg-[#0a0a0a] font-mono text-xs md:text-sm text-green-400 resize-none outline-none leading-relaxed selection:bg-zinc-800"
                   spellCheck={false}
                   placeholder="생성된 프롬프트가 없습니다..."
                 />
               ) : (
-                <div className="h-full overflow-y-auto p-6 space-y-8 scrollbar-thin scrollbar-thumb-zinc-800">
+                <div className="h-full overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-8 scrollbar-thin scrollbar-thumb-zinc-800">
                   {/* Visual Preview */}
                   {(template.prompt_sections || []).map((section) => (
-                    <div key={section.section_id} className="space-y-4 bg-zinc-900/30 p-5 rounded-lg border border-zinc-800/50">
-                      <h3 className="text-base font-bold text-zinc-100 flex items-center gap-2 pb-2 border-b border-zinc-800">
+                    <div key={section.section_id} className="space-y-3 md:space-y-4 bg-zinc-900/30 p-3 md:p-5 rounded-lg border border-zinc-800/50">
+                      <h3 className="text-sm md:text-base font-bold text-zinc-100 flex flex-wrap items-center gap-2 pb-2 border-b border-zinc-800">
                         {section.section_label_ko || section.section_label}
                         {section.is_midjourney_params && <span className="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400 font-normal">PARAMS</span>}
-                        {(section.is_active !== false) ? 
-                           <span className="text-[10px] text-emerald-400 bg-emerald-900/20 px-1.5 rounded border border-emerald-900/30 font-normal">Active</span> : 
+                        {(section.is_active !== false) ?
+                           <span className="text-[10px] text-emerald-400 bg-emerald-900/20 px-1.5 rounded border border-emerald-900/30 font-normal">Active</span> :
                            <span className="text-[10px] text-zinc-500 bg-zinc-800 px-1.5 rounded font-normal">Inactive</span>
                         }
                       </h3>
-                      
-                      <div className="flex flex-col gap-6">
+
+                      <div className="flex flex-col gap-4 md:gap-6">
                         {(section.components || []).map((comp) => (
-                          <div key={comp.component_id} id={`comp-${comp.component_id}`} className="space-y-3 transition-all duration-300 rounded-lg">
+                          <div key={comp.component_id} id={`comp-${comp.component_id}`} className="space-y-2 md:space-y-3 transition-all duration-300 rounded-lg">
                              {/* Component Header to organize visual editor */}
                              <div className="text-xs font-semibold text-zinc-400 flex items-center gap-2 px-1">
                                 <Box className="w-3 h-3" />
                                 {comp.component_label_ko || comp.component_label}
                              </div>
 
-                             <div className="grid grid-cols-1 gap-4 pl-2 border-l border-zinc-800/50">
+                             <div className="grid grid-cols-1 gap-3 md:gap-4 pl-2 border-l border-zinc-800/50">
                                {(comp.attributes || []).map((attr) => (
-                                 <div key={attr.attr_id} className="bg-black p-4 rounded border border-zinc-800 shadow-sm flex flex-col gap-3 hover:border-zinc-700 transition-colors">
+                                 <div key={attr.attr_id} className="bg-black p-3 md:p-4 rounded border border-zinc-800 shadow-sm flex flex-col gap-2 md:gap-3 hover:border-zinc-700 transition-colors">
                                    {/* Attribute Header */}
-                                   <div className="flex items-center justify-between">
-                                     <label className="text-sm font-medium text-zinc-200 flex items-center gap-2">
+                                   <div className="flex items-center justify-between gap-2">
+                                     <label className="text-xs md:text-sm font-medium text-zinc-200 flex items-center gap-2 truncate">
                                        {attr.label_ko || attr.label}
                                        {(attr.is_active === false) && <span className="text-[10px] text-red-900 font-normal">(Inactive)</span>}
                                      </label>
-                                     <div className="flex items-center gap-1">
+                                     <div className="flex items-center gap-1 shrink-0">
                                        <ClearButton onClear={() => updateAttributeValue(section.section_id, comp.component_id, attr.attr_id, "")} />
                                        <CopyButton value={Array.isArray(attr.value) ? attr.value.join(', ') : String(attr.value)} />
                                      </div>
                                    </div>
-   
-                                   {/* Split Layout */}
-                                   <div className="flex gap-4 items-start">
+
+                                   {/* Split Layout - Stack on mobile */}
+                                   <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-start">
                                      {/* Left: Current Value (Translated/Reference) */}
-                                     <div className="w-[30%] border-r border-zinc-800 pr-3 pt-2 flex flex-col gap-2">
-                                       <div className="text-sm text-zinc-400 break-words leading-relaxed" title={String(attr.value)}>
+                                     <div className="w-full md:w-[30%] md:border-r border-zinc-800 md:pr-3 pb-2 md:pb-0 md:pt-2 flex flex-col gap-2 border-b md:border-b-0">
+                                       <div className="text-xs md:text-sm text-zinc-400 break-words leading-relaxed" title={String(attr.value)}>
                                          {getDisplayValue(attr, attr.value)}
                                        </div>
                                        <div className="self-end opacity-70 hover:opacity-100 transition-opacity">
                                           <CopyButton value={getDisplayValue(attr, attr.value)} />
                                        </div>
                                      </div>
-   
+
                                      {/* Right: Edit Field (English Input) */}
                                      <div className="flex-1 min-w-0">
                                        <div className="relative">
-                                         <input 
+                                         <input
                                            list={attr.options ? `datalist-${attr.attr_id}` : undefined}
-                                           type="text" 
-                                           placeholder="영문 값 입력 (예: Dragon)..."
-                                           className="w-full text-sm p-2.5 bg-zinc-950 border border-zinc-700 rounded text-white outline-none focus:border-white focus:ring-1 focus:ring-white/20 transition-all placeholder:text-zinc-700"
+                                           type="text"
+                                           placeholder="영문 값 입력..."
+                                           className="w-full text-sm p-2.5 md:p-2.5 bg-zinc-950 border border-zinc-700 rounded text-white outline-none focus:border-white focus:ring-1 focus:ring-white/20 transition-all placeholder:text-zinc-700"
                                            value={Array.isArray(attr.value) ? attr.value.join(', ') : attr.value}
                                            onChange={(e) => updateAttributeValue(section.section_id, comp.component_id, attr.attr_id, e.target.value)}
                                          />
                                        </div>
-                                       
+
                                        {attr.options && (
                                          <datalist id={`datalist-${attr.attr_id}`}>
                                             {attr.options.map((opt: any) => {
@@ -944,31 +970,31 @@ const App = () => {
 
           {/* Bottom: Quick Translator (AI) - Replacement for blocked Google iframe */}
           <div className="border-t border-zinc-800 bg-zinc-900 shrink-0">
-             <button 
+             <button
                onClick={() => setIsTranslatorOpen(!isTranslatorOpen)}
-               className="w-full flex items-center justify-between px-6 py-2 bg-zinc-950 hover:bg-zinc-900 text-xs text-zinc-400 border-b border-zinc-800 transition-colors"
+               className="w-full flex items-center justify-between px-3 md:px-6 py-2 bg-zinc-950 hover:bg-zinc-900 text-xs text-zinc-400 border-b border-zinc-800 transition-colors"
              >
                <div className="flex items-center gap-2">
                  <Languages className="w-4 h-4 text-emerald-500" />
-                 <span className="font-semibold text-zinc-300">AI 퀵 번역기 (Quick Translator)</span>
+                 <span className="font-semibold text-zinc-300">AI 퀵 번역기</span>
                </div>
                <div className="flex items-center gap-2">
                  {isTranslatorOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
                </div>
              </button>
-             
+
              {isTranslatorOpen && (
-               <div className="p-4 flex gap-3 h-48 animate-in slide-in-from-bottom-2 fade-in duration-300">
-                  <div className="flex-1 flex flex-col gap-2">
+               <div className="p-3 md:p-4 flex flex-col md:flex-row gap-2 md:gap-3 h-auto md:h-48 animate-in slide-in-from-bottom-2 fade-in duration-300">
+                  <div className="flex-1 flex flex-col gap-1 md:gap-2">
                      <div className="flex justify-between items-center text-xs text-zinc-500 px-1">
-                        <span>입력 (Korean/English)</span>
+                        <span>입력</span>
                         <a href="https://translate.google.co.kr/?sl=auto&tl=en&op=translate" target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-white transition-colors">
-                           <ExternalLink className="w-3 h-3" /> 구글 번역기 열기
+                           <ExternalLink className="w-3 h-3" /> <span className="hidden sm:inline">구글 번역기</span>
                         </a>
                      </div>
-                     <textarea 
-                       className="flex-1 bg-black border border-zinc-700 rounded-lg p-3 text-sm text-white resize-none focus:ring-1 focus:ring-emerald-500/50 outline-none"
-                       placeholder="번역할 텍스트를 입력하세요..."
+                     <textarea
+                       className="flex-1 min-h-[80px] md:min-h-0 bg-black border border-zinc-700 rounded-lg p-2.5 md:p-3 text-sm text-white resize-none focus:ring-1 focus:ring-emerald-500/50 outline-none"
+                       placeholder="번역할 텍스트..."
                        value={transInput}
                        onChange={(e) => setTransInput(e.target.value)}
                        onKeyDown={(e) => {
@@ -979,14 +1005,15 @@ const App = () => {
                        }}
                      />
                   </div>
-                  <div className="flex flex-col justify-center gap-2">
-                     <button 
+                  <div className="flex flex-row md:flex-col justify-center gap-2 py-1 md:py-0">
+                     <button
                        onClick={handleQuickTranslation}
                        disabled={isTransLoading || !transInput.trim()}
-                       className="p-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-full transition-all duration-100 active:scale-95 disabled:opacity-50"
+                       className="flex-1 md:flex-none p-2.5 md:p-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg md:rounded-full transition-all duration-100 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                        title="번역하기"
                      >
                        {isTransLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
+                       <span className="md:hidden text-xs">번역</span>
                      </button>
                      <button
                         onClick={() => {
@@ -994,18 +1021,19 @@ const App = () => {
                             setTransInput(transOutput);
                             setTransOutput(temp);
                         }}
-                        className="p-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-full transition-all duration-100 active:scale-95"
+                        className="flex-1 md:flex-none p-2.5 md:p-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg md:rounded-full transition-all duration-100 active:scale-95 flex items-center justify-center gap-2"
                         title="입력/결과 바꾸기 (Swap)"
                      >
                         <ArrowRightLeft className="w-5 h-5" />
+                        <span className="md:hidden text-xs">바꾸기</span>
                      </button>
                   </div>
-                  <div className="flex-1 flex flex-col gap-2">
-                     <span className="text-xs text-zinc-500 px-1">결과 (Translated)</span>
-                     <textarea 
+                  <div className="flex-1 flex flex-col gap-1 md:gap-2">
+                     <span className="text-xs text-zinc-500 px-1">결과</span>
+                     <textarea
                        readOnly
-                       className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-emerald-400 resize-none outline-none"
-                       placeholder="번역 결과가 여기에 표시됩니다."
+                       className="flex-1 min-h-[80px] md:min-h-0 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 md:p-3 text-sm text-emerald-400 resize-none outline-none"
+                       placeholder="번역 결과..."
                        value={transOutput}
                      />
                   </div>
@@ -1017,25 +1045,25 @@ const App = () => {
 
       {/* Upload Modal */}
       {isUploadModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 rounded-xl shadow-2xl max-w-2xl w-full border border-zinc-800 flex flex-col h-[80vh]">
-            <div className="p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950 rounded-t-xl shrink-0">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-4">
+          <div className="bg-zinc-900 rounded-xl shadow-2xl max-w-2xl w-full border border-zinc-800 flex flex-col h-[90vh] md:h-[80vh]">
+            <div className="p-3 md:p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950 rounded-t-xl shrink-0">
+              <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                 <FileJson className="w-5 h-5 text-emerald-500" />
                 JSON 템플릿 불러오기
               </h3>
-              <button 
+              <button
                 onClick={() => setIsUploadModalOpen(false)}
-                className="text-zinc-500 hover:text-white transition-all duration-100 active:scale-95"
+                className="text-zinc-500 hover:text-white transition-all duration-100 active:scale-95 p-1"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            <div className="p-6 flex-1 overflow-hidden flex flex-col">
+
+            <div className="p-3 md:p-6 flex-1 overflow-hidden flex flex-col">
               {uploadError && (
-                <div className="mb-4 p-3 bg-red-900/20 border border-red-900/50 rounded-lg flex items-start gap-3 text-red-200 text-sm shrink-0">
-                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <div className="mb-3 md:mb-4 p-2.5 md:p-3 bg-red-900/20 border border-red-900/50 rounded-lg flex items-start gap-2 md:gap-3 text-red-200 text-xs md:text-sm shrink-0">
+                  <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-red-500 shrink-0 mt-0.5" />
                   <div>
                     <p className="font-bold text-red-400">오류 발생</p>
                     <p>{uploadError}</p>
@@ -1047,24 +1075,24 @@ const App = () => {
                 value={uploadInput}
                 onChange={(e) => setUploadInput(e.target.value)}
                 placeholder='{"meta_data": ..., "prompt_sections": ...}'
-                className="flex-1 w-full p-4 bg-black text-zinc-300 font-mono text-xs rounded-lg border border-zinc-700 focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none resize-none"
+                className="flex-1 w-full p-3 md:p-4 bg-black text-zinc-300 font-mono text-xs rounded-lg border border-zinc-700 focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none resize-none"
               />
             </div>
 
-            <div className="p-5 border-t border-zinc-800 bg-zinc-950 rounded-b-xl flex justify-end gap-3 shrink-0">
+            <div className="p-3 md:p-5 border-t border-zinc-800 bg-zinc-950 rounded-b-xl flex justify-end gap-2 md:gap-3 shrink-0">
               <button
                 onClick={() => setIsUploadModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-all duration-100 active:scale-95"
+                className="px-3 md:px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-all duration-100 active:scale-95"
               >
                 취소
               </button>
               <button
                 onClick={handleUpload}
                 disabled={!uploadInput.trim() || isUploadLoading}
-                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-lg shadow-lg shadow-emerald-900/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-100 active:scale-95"
+                className="px-4 md:px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-lg shadow-lg shadow-emerald-900/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-100 active:scale-95"
               >
                 {isUploadLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                템플릿 적용
+                <span className="hidden sm:inline">템플릿</span> 적용
               </button>
             </div>
           </div>
@@ -1073,51 +1101,51 @@ const App = () => {
 
       {/* API Info Modal */}
       {isApiInfoOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 rounded-xl shadow-2xl max-w-md w-full border border-zinc-800">
-            <div className="p-5 border-b border-zinc-800 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-4">
+          <div className="bg-zinc-900 rounded-xl shadow-2xl max-w-md w-full border border-zinc-800 max-h-[90vh] overflow-y-auto">
+            <div className="p-3 md:p-5 border-b border-zinc-800 flex items-center justify-between sticky top-0 bg-zinc-900 z-10">
+              <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                 <Cpu className="w-5 h-5 text-zinc-400" />
                 API 연결 정보
               </h3>
-              <button 
+              <button
                 onClick={() => setIsApiInfoOpen(false)}
-                className="text-zinc-500 hover:text-white transition-all duration-100 active:scale-95"
+                className="text-zinc-500 hover:text-white transition-all duration-100 active:scale-95 p-1"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-4 md:p-6 space-y-4">
               <div className="space-y-2">
-                <p className="text-sm text-zinc-400">현재 사용 중인 모델:</p>
-                <div className="flex items-center gap-2 text-white font-mono bg-zinc-950 px-3 py-2 rounded border border-zinc-800">
+                <p className="text-xs md:text-sm text-zinc-400">현재 사용 중인 모델:</p>
+                <div className="flex items-center gap-2 text-white font-mono text-sm bg-zinc-950 px-3 py-2 rounded border border-zinc-800">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                   gemini-2.5-flash
                 </div>
               </div>
-              
+
               <div className="space-y-2 pt-2 border-t border-zinc-800">
-                <p className="text-sm text-zinc-400">기능별 사용:</p>
-                <ul className="space-y-2 text-sm text-zinc-300">
+                <p className="text-xs md:text-sm text-zinc-400">기능별 사용:</p>
+                <ul className="space-y-2 text-xs md:text-sm text-zinc-300">
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
                     <div>
-                      <span className="font-semibold text-white">AI 프롬프트 수정:</span>
-                      <p className="text-xs text-zinc-500 mt-0.5">사용자 요청을 반영하여 이미지 생성에 최적화된 영문 JSON을 생성합니다.</p>
+                      <span className="font-semibold text-white">AI 프롬프트 수정</span>
+                      <p className="text-xs text-zinc-500 mt-0.5">이미지 생성에 최적화된 영문 JSON을 생성</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
                     <div>
-                      <span className="font-semibold text-white">AI 퀵 번역기:</span>
-                      <p className="text-xs text-zinc-500 mt-0.5">하단 패널에서 한글↔영문 텍스트를 즉시 번역합니다.</p>
+                      <span className="font-semibold text-white">AI 퀵 번역기</span>
+                      <p className="text-xs text-zinc-500 mt-0.5">한글↔영문 텍스트 즉시 번역</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2 opacity-50">
                     <ShieldCheck className="w-4 h-4 text-zinc-500 mt-0.5 shrink-0" />
                     <div>
-                      <span className="font-semibold text-zinc-400">템플릿 업로드 (Parse Only):</span>
-                      <p className="text-xs text-zinc-500 mt-0.5">API를 사용하지 않고 입력된 JSON을 그대로 파싱합니다.</p>
+                      <span className="font-semibold text-zinc-400">템플릿 업로드 (Parse Only)</span>
+                      <p className="text-xs text-zinc-500 mt-0.5">API 미사용, JSON 파싱만 수행</p>
                     </div>
                   </li>
                 </ul>
@@ -1125,9 +1153,9 @@ const App = () => {
 
               {/* API Key Input Section */}
               <div className="space-y-2 pt-4 border-t border-zinc-800">
-                 <label className="text-sm font-bold text-white flex items-center gap-2">
+                 <label className="text-xs md:text-sm font-bold text-white flex items-center gap-2">
                    <KeyRound className="w-4 h-4 text-emerald-400" />
-                   Custom API Key (Optional)
+                   Custom API Key
                  </label>
                  <div className="relative">
                    <input
@@ -1139,7 +1167,7 @@ const App = () => {
                    />
                  </div>
                  <p className="text-xs text-zinc-500">
-                   입력하지 않으면 기본 제공 키(process.env.API_KEY)가 사용됩니다.
+                   미입력시 기본 키 사용
                  </p>
               </div>
             </div>
