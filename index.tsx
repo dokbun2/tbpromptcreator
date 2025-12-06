@@ -625,29 +625,58 @@ const App = () => {
 
   const handleUpload = () => {
     setUploadError(null);
+    setIsUploadLoading(true);
+
     let cleanedInput = uploadInput.trim();
-    
-    if (cleanedInput.startsWith('```')) {
-      cleanedInput = cleanedInput.replace(/^```(json)?/, '').replace(/```$/, '').trim();
-    }
+
+    // Remove markdown code blocks (handles various formats)
+    // Matches: ```json\n...\n``` or ```\n...\n``` or just ```...```
+    cleanedInput = cleanedInput
+      .replace(/^```(?:json|JSON)?\s*\n?/gm, '')
+      .replace(/\n?```\s*$/gm, '')
+      .trim();
+
+    // Debug log for troubleshooting
+    console.log('[handleUpload] Cleaned input:', cleanedInput.substring(0, 100));
 
     try {
       if (!cleanedInput) throw new Error("JSON 내용을 입력해주세요.");
-      const json = JSON.parse(cleanedInput);
+
+      // Try to parse JSON
+      let json;
+      try {
+        json = JSON.parse(cleanedInput);
+      } catch (parseErr: any) {
+        console.error('[handleUpload] Parse error:', parseErr);
+        throw new Error(`JSON 파싱 오류: ${parseErr.message}`);
+      }
+
       if (!json || typeof json !== 'object') throw new Error("유효한 JSON 객체가 아닙니다.");
-      
+
       if (!Array.isArray(json.prompt_sections)) {
         if (json.prompt_sections && typeof json.prompt_sections === 'object') {
            throw new Error("'prompt_sections' 형식이 올바르지 않습니다.");
         }
         json.prompt_sections = [];
       }
-      
-      // Removed API translation call. Just parsing provided JSON.
+
+      console.log('[handleUpload] Successfully parsed template:', json.meta_data?.template_name || 'Unknown');
+
+      // Apply template
       setTemplate(json);
+
+      // Close modal and reset state
       setIsUploadModalOpen(false);
       setUploadInput("");
+
+      // Mobile: close sidebar and switch to preview tab to show changes
+      setIsSidebarOpen(false);
+      setActiveTab('preview');
+
+      // Reset expanded section to show fresh structure
+      setExpandedSection(null);
     } catch (e: any) {
+      console.error('[handleUpload] Error:', e);
       setUploadError(e.message || "JSON 파싱 오류가 발생했습니다.");
     } finally {
       setIsUploadLoading(false);
