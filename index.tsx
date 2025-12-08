@@ -715,6 +715,14 @@ const App = () => {
         </div>
         <div className="flex items-center gap-1 md:gap-2">
            <button
+             onClick={() => setIsUploadModalOpen(true)}
+             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-100 active:scale-95 bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-700 hover:border-zinc-600 text-sm font-medium shadow-sm"
+             title="JSON 템플릿 업로드"
+           >
+             <Upload className="w-3.5 h-3.5" />
+             업로드
+           </button>
+           <button
              onClick={() => setIsApiInfoOpen(true)}
              className={`p-2 rounded-full transition-all duration-100 active:scale-95 relative group ${userApiKey ? 'text-emerald-400 bg-emerald-900/20' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
              title="API 연결 정보"
@@ -749,18 +757,26 @@ const App = () => {
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
           top-14 md:top-0 h-[calc(100vh-3.5rem)] md:h-auto
         `}>
-          <div className="p-3 md:p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900">
+          {/* 프롬프트 만들기 버튼 */}
+          <div className="p-3 md:p-4 border-b border-zinc-800 bg-zinc-950">
+            <a
+              href="https://gemini.google.com/gem/13HOLZGAzOKloWSBnxejnMvWDOJHNvdyu?usp=sharing"
+              target="_blank"
+              rel="noreferrer"
+              className="group relative flex items-center justify-center gap-2.5 w-full px-4 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-900/40 transition-all duration-200 active:scale-[0.98] overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <Wand2 className="w-4.5 h-4.5 group-hover:rotate-12 transition-transform duration-200" />
+              <span>프롬프트 만들기</span>
+              <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+            </a>
+          </div>
+
+          <div className="p-3 md:p-4 border-b border-zinc-800 bg-zinc-900">
             <h2 className="font-semibold text-sm text-zinc-300 flex items-center gap-2">
               <Layers className="w-4 h-4 text-zinc-500" />
               구조 (Structure)
             </h2>
-            <button
-              onClick={() => setIsUploadModalOpen(true)}
-              className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700 rounded hover:bg-zinc-700 transition-all duration-100 active:scale-95"
-            >
-              <Upload className="w-3 h-3" />
-              업로드
-            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-2 md:p-3 space-y-2 md:space-y-3 scrollbar-thin scrollbar-thumb-zinc-800">
